@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <title>EzPaste</title>
+  <link href="style.css" rel="stylesheet">
+</head>
+<body>
+<script>
+const maxs = 2000000;
+
+function lengthInUtf8Bytes(str) {
+  var m = encodeURIComponent(str).match(/%[89ABab]/g);
+  return str.length + (m ? m.length : 0);
+}
+
+function arChange(e) {
+  var bytes = lengthInUtf8Bytes(e.target.value);
+  if (bytes > maxs) {
+    document.getElementById('limtxt').style.display = 'block';
+    document.getElementById('submit').disabled = true;
+  }
+  else {
+    document.getElementById('limtxt').style.display = 'none';
+    document.getElementById('submit').disabled = false;
+  }
+  var rows = e.target.value.split(/\r\n|\r|\n/).length;
+  e.target.setAttribute("rows", Math.max(8, rows));
+}
+</script>
+
+
+    <h1 class="major-title">EzPaste</h1>
+    <p class="red" id="limtxt" style="display: none;">Too much text! Limit is: 2000000!</p>
+    <form id="paste" method="post" action="upload-fancy">
+      <input type="text" name="p_title" placeholder="document title"><br>
+      <textarea name="p_content" cols="80" rows="8" oninput="arChange(event)" placeholder="Type or paste text here..."></textarea><br>
+      <label for="enc">Encrypt: </label>
+      <input type="checkbox" name="enc" id="enc" value="enc" checked="checked"><br>
+      <input type="submit" id="submit" value="Create!">
+    </form>
+  <hr>
+<p>EzPaste: A simple, online and encrypted text file upload tool.</p>
+
+
+
+</body></html>

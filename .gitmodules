@@ -1,0 +1,3 @@
+[submodule "c-http-server"]
+	path = c-http-server
+	url = https://github.com/alex-s168/c-http-server.git

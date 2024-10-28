@@ -1,0 +1,179 @@
+/* 
+Funni fact: Almost the whole website runs on this css HEEHEHEEHEHEHE
+
+im bad at css
+*/
+
+
+body {
+  font-size: 1.3rem;
+
+  margin-left: -100%;
+  margin-top: 2%;
+    
+  background: #223;
+  color: #eed; 
+  font-family: monospace; 
+	
+  animation: scrollIn 1s;
+  margin-left: 4%;
+}
+
+.red {
+  color: #d53032;
+}
+
+a {
+  color: #e6e6e6;
+  animation: aAnim2 0.6s;
+  opacity: 0.8;
+}
+a:hover {
+  animation: aAnim 0.6s;
+  opacity: 1;
+  color: #eed;
+}
+@keyframes aAnim {
+  from {
+    opacity: 0.8;
+    color: #e6e6e6;
+  }
+  to {
+    opacity: 1;
+    color: #eed;
+  }
+}
+@keyframes aAnim2 {
+  from {
+    opacity: 1;
+    color: #eed;
+  }
+  to {
+    opacity: 0.8;
+    color: #e6e6e6;
+  }
+}
+
+.special-fade {
+  position: relative;
+  text-decoration: none;
+}
+.special-fade::after {	
+  content: '';
+  position: absolute;
+  width: 25%;
+  height: 2px;
+  bottom: 0;
+  left: 0;  
+  margin-left: auto; 
+  margin-right: 0;
+  background-color: #eed;
+    
+  transform: scaleX(0);
+  animation: scrollIn 1.4s;
+  animation: special-fade-anim 4s;
+  transform: scaleX(0);
+}
+@keyframes special-fade-anim {
+  from {
+    transform: scaleX(0);
+  }
+  25% {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+
+@keyframes scrollIn {
+  from {
+    margin-left: -100%;
+  }
+  80% {
+    margin-left: 5.2%;
+  }
+  to {
+    margin-left: 4%;
+  }
+}
+
+hr {
+  margin-left: -1.1%;
+  margin-bottom: 3%;
+}
+
+.major-title {
+  font-size: 6rem;
+  margin-bottom: 3%;
+  letter-spacing: 0.50em; 
+
+  border-bottom: 2px solid #eed;
+	
+  margin-left: -1%;
+  padding-left: 1%;
+}
+
+.code {
+  font-size: 1.3rem;
+
+  margin-top: -0.5%;
+  margin-left: 0.5%;
+  padding: 8px;
+  padding-right: 20px;
+
+  display: inline-block;
+
+  border: 0px;
+  border-radius: 4px;
+
+  background-color: #363650;
+}
+
+thead > tr > th {
+  border-bottom: 2px solid #eed;
+  padding-bottom: 2px;
+  margin-bottom: 5px;
+}
+
+th {
+  text-align: left;
+  padding: 5px;
+  padding-right: 15px;
+}
+
+
+input, textarea, select {
+  font-size: 1.3rem;
+
+  margin: 2px;
+  margin-top: 10px;
+
+  border: 2px solid #223;
+  border-radius: 4px;
+ 
+  background-color: #363650;
+  color: #eed;
+  font-family: monospace; 
+
+  padding: 6px;
+}
+
+input:focus, textarea:focus, select:focus {
+  border: 2px solid #eed;
+  outline: none;
+}
+
+textarea {
+  resize: none;
+  width: 98%;
+}
+
+input[type="submit"] {
+  padding: 10px;
+}
+
+input[type="text"] {
+  width: 98%;
+}
