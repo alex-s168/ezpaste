@@ -128,9 +128,10 @@ bool respondWithFile(struct HttpResponse* r, const char* filePath, const char* m
 }
 
 // modified from: https://gist.github.com/jmsaavedra/7964251
-void urldecode2(char *dst, size_t dstlen, const char *src)
+size_t urldecode2(char *dst, size_t dstlen, const char *src)
 {
-  if (dstlen == 0) return;
+  size_t olddlen = dstlen;
+  if (dstlen == 0) return 0;
   char a, b;
   while (*src) {
     if (!dstlen) break;
@@ -169,4 +170,62 @@ void urldecode2(char *dst, size_t dstlen, const char *src)
     dst --;
     *dst = '\0';
   }
+  dstlen ++;
+  return olddlen - dstlen;
+}
+
+/** 0 if ok */
+int http_reqAsPost(HttpPostData* out, struct HttpRequest* request)
+{
+    char* bodycpy = malloc(request->body_size + 1);
+    if (bodycpy == NULL)
+        return 1;
+
+    memcpy(bodycpy, request->body, request->body_size);
+    bodycpy[request->body_size] = '\0';
+
+    size_t num_and = 0;
+    for (size_t i = 0; i < request->body_size; i ++)
+        if (request->body[i] == '&')
+            num_and ++;
+    out->items = malloc(sizeof(*out->items) * (num_and + 1));
+
+    if (out->items == NULL) {
+        free(bodycpy);
+        return 1;
+    }
+
+    out->_allocptr = bodycpy;
+
+    struct urlGETParam p;
+    urlGETPrepare(&p);
+    while (urlGETNext(&p, bodycpy)) {
+        urldecode2(out->items[out->count].key, 64, p.k);
+        size_t n =
+            urldecode2(bodycpy, request->body_size - (bodycpy - out->_allocptr), p.v);
+        HttpPostValue* v = &out->items[out->count ++].val;
+        v->len = n;
+        v->nt = bodycpy;
+        bodycpy += n;
+    }
+
+    return 0;
+}
+
+/** 0 if ok */
+int http_postGet(HttpPostValue* out, HttpPostData const* data, const char * key)
+{
+    for (size_t i = 0; i < data->count; i ++) {
+        if (!strcmp(data->items[i].key, key)) {
+            *out = data->items[i].val;
+            return 0;
+        }
+    }
+    return 1;
+}
+
+void http_postFree(HttpPostData p)
+{
+    free(p.items);
+    free(p._allocptr);
 }
