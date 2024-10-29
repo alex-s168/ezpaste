@@ -4,3 +4,6 @@ out
 build
 *.exe
 *.pch
+*.spl
+*.spi
+*.bin

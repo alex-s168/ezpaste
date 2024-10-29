@@ -1,12 +1,12 @@
 http_serv=""
 http_serv+="c-http-server/src/*.c c-http-server/C-Thread-Pool/thpool.c"
 http_serv+=" -DHAS_ZSTD -lzstd"
-
 # TODO: broken for absolutely no reason
 #http_serv+=" -DHAS_ZLIB -lz"
 
 app=""
-app+="main.c utils.c"
+app+="main.c utils.c memmap.c"
+app+=" -lsparkey"
 
 : ${CC:="clang"}
 

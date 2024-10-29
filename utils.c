@@ -88,6 +88,9 @@ bool respondWithFile(struct HttpResponse* r, const char* filePath, const char* m
     while (*filePath == '/')
         filePath ++;
 
+    if (*filePath == '\0')
+        return false;
+
     char newpath[128];
     sprintf(newpath, "%s/%s", file_path, filePath);
 
@@ -115,7 +118,6 @@ bool respondWithFile(struct HttpResponse* r, const char* filePath, const char* m
         r->content_type = mime;
         r->content = buf;
         r->content_size = len;
-        LOGF("content is %zu", len);
         r->free_content = true;
         status = true;
     } else {
@@ -164,19 +166,21 @@ size_t urldecode2(char *dst, size_t dstlen, const char *src)
       dstlen--;
     }
   }
-  if (dstlen)
+  if (dstlen) {
     *dst++ = '\0';
-  else {
+  } else {
     dst --;
     *dst = '\0';
   }
-  dstlen ++;
+  dstlen --;
   return olddlen - dstlen;
 }
 
 /** 0 if ok */
 int http_reqAsPost(HttpPostData* out, struct HttpRequest* request)
 {
+    memset(out, 0, sizeof(HttpPostData));
+
     char* bodycpy = malloc(request->body_size + 1);
     if (bodycpy == NULL)
         return 1;
@@ -204,7 +208,7 @@ int http_reqAsPost(HttpPostData* out, struct HttpRequest* request)
         size_t n =
             urldecode2(bodycpy, request->body_size - (bodycpy - out->_allocptr), p.v);
         HttpPostValue* v = &out->items[out->count ++].val;
-        v->len = n;
+        v->len = n - 1;
         v->nt = bodycpy;
         bodycpy += n;
     }
