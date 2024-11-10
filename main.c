@@ -110,7 +110,7 @@ static struct HttpResponse serve(struct HttpRequest request, void* userdata) {
         r.status_msg = "Content Too Large";
         r.content = "Request too large";
     }
-    else if (respondWithFile(&r, request.path, NULL))
+    else if (respondWithFile(&r, request.path, NULL, NULL))
     {
     }
     else if (!memcmp(request.path, "/view", 5))
@@ -181,12 +181,36 @@ static struct HttpResponse serve(struct HttpRequest request, void* userdata) {
                 }
 
                 if (sk == SPARKEY_SUCCESS) {
-                    r.status = 200;
-                    r.status_msg = "OK";
-                    r.content_type = mime_text;
-                    r.content =  (char *) valbuf;
-                    r.free_content = true;
-                    r.content_size = datalen;
+                    if (!memcmp(request.path, "/view-fancy", 11)) {
+                        int nok = 0;
+
+                        TemplCtx ctx;
+                        templ_init(&ctx);
+                        nok |= templ_addVar(&ctx, "paste_title", header.tite);
+
+                        char rawLink[128];
+                        snprintf(rawLink, sizeof(rawLink), "%sview?id=%zu", SERVER_ADDR, key);
+                        nok |= templ_addVar(&ctx, "paste_raw_link", rawLink);
+
+                        nok |= templ_addVar(&ctx, "paste_content", (char*) valbuf);
+
+                        if (nok || !respondWithFile(&r, "/_fancy_view.html", "text/html", &ctx)) {
+                            r.status = 500;
+                            r.status_msg = "Internal Server Error";
+                            r.content_type = mime_text;
+                            r.content = "failed to upload file: Server error";
+                        }
+
+                        templ_free(&ctx);
+                    } 
+                    else {
+                        r.status = 200;
+                        r.status_msg = "OK";
+                        r.content_type = mime_text;
+                        r.content =  (char *) valbuf;
+                        r.free_content = true;
+                        r.content_size = datalen;
+                    }
                 }
                 else {
                     if (valbuf) {
@@ -219,8 +243,7 @@ static struct HttpResponse serve(struct HttpRequest request, void* userdata) {
             HttpPostValue content; 
             status += http_postGet(&content, &post, "p_content");
 
-            char* heap = malloc(128);
-            if (status == 0 && heap)
+            if (status == 0)
             {
                 LOGF("Uploading \"%s\"", title.nt);
                 paste_key_t key = upload(title.nt, content);
@@ -234,13 +257,30 @@ static struct HttpResponse serve(struct HttpRequest request, void* userdata) {
                 }
                 else
                 {
-                    r.status = 200;
-                    r.status_msg = "OK";
-                    r.content_type = mime_text;
+                    int nok = 0;
 
-                    sprintf(heap, "%sview?id=%zu", SERVER_ADDR, key);
-                    r.content = heap;
-                    r.free_content = true;
+                    TemplCtx ctx;
+                    templ_init(&ctx);
+                    nok |= templ_addVar(&ctx, "paste_title", title.nt);
+
+                    char fancyLink[128];
+                    snprintf(fancyLink, sizeof(fancyLink), "%sview-fancy?id=%zu", SERVER_ADDR, key);
+                    nok |= templ_addVar(&ctx, "paste_fancy_link", fancyLink);
+
+                    char rawLink[128];
+                    snprintf(rawLink, sizeof(rawLink), "%sview?id=%zu", SERVER_ADDR, key);
+                    nok |= templ_addVar(&ctx, "paste_raw_link", rawLink);
+
+                    nok |= templ_addVar(&ctx, "paste_delete_link", "not yet implemented");
+
+                    if (nok || !respondWithFile(&r, "/_fancy_upload.html", "text/html", &ctx)) {
+                        r.status = 500;
+                        r.status_msg = "Internal Server Error";
+                        r.content_type = mime_text;
+                        r.content = "failed to upload file: Server error";
+                    }
+
+                    templ_free(&ctx);
                 }
             }
         

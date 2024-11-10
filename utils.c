@@ -83,7 +83,7 @@ const char* detectMime(const char* path)
 }
 
 static const char* file_path = "html";
-bool respondWithFile(struct HttpResponse* r, const char* filePath, const char* mime)
+bool respondWithFile(struct HttpResponse* r, const char* filePath, const char* mime, TemplCtx* optTempl)
 {
     while (*filePath == '/')
         filePath ++;
@@ -113,15 +113,32 @@ bool respondWithFile(struct HttpResponse* r, const char* filePath, const char* m
     if (buf) {
         fread(buf, 1, len, f);
 
-        r->status = 200;
-        r->status_msg = "OK";
-        r->content_type = mime;
-        r->content = buf;
-        r->content_size = len;
-        r->free_content = true;
-        status = true;
+        if (optTempl) {
+            if (templ_run(optTempl, buf) == TEMPL_OK) {
+                char* t = templ_getAndOwnContent(optTempl);
+                free(buf);
+                r->content = t;
+                r->content_size = t ? strlen(t) : 0;
+                r->free_content = true;
+                status = true;
+                r->status = 200;
+                r->status_msg = "OK";
+                r->content_type = mime;
+            } else {
+                ERRF("error while apply template lang on static site file");
+            }
+        }
+        else {
+            r->status = 200;
+            r->status_msg = "OK";
+            r->content_type = mime;
+            r->content = buf;
+            r->content_size = len;
+            r->free_content = true;
+            status = true;
+        }
     } else {
-        ERRF("oom while loading static file");
+        ERRF("error while loading static site file");
     }
 
     fclose(f);

@@ -5,7 +5,7 @@ http_serv+=" -DHAS_ZSTD -lzstd"
 #http_serv+=" -DHAS_ZLIB -lz"
 
 app=""
-app+="main.c utils.c memmap.c"
+app+="main.c utils.c memmap.c templating_lang.c"
 app+=" -lsparkey"
 
 : ${CC:="clang"}
