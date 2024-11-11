@@ -7,3 +7,4 @@ build
 *.spl
 *.spi
 *.bin
+obj/
